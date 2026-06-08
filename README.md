@@ -1,7 +1,7 @@
 # Sales Meeting Preparation Agent
 
-A production-style **multi-agent LLM system** built with LangGraph, OpenAI, ChromaDB, and Streamlit.
-Given a company name and meeting context, it autonomously researches the prospect, extracts strategic insights,
+A production-style **multi-agent LLM system** built with LangGraph, OpenAI, ChromaDB and Streamlit.
+Given a company name and meeting context, it autonomously researches the prospect, extracts strategic insights
 and generates a complete, actionable meeting brief in under 60 seconds.
 
 ---
@@ -24,7 +24,7 @@ Supervisor         ← Quality check; retry Research agent if score < 4/10
 Final Brief        ← Formatted markdown + PDF export
 ```
 
-Built with **LangGraph StateGraph** for orchestration, conditional edges for the retry loop,
+Built with **LangGraph StateGraph** for orchestration, conditional edges for the retry loop
 and a shared typed state object passed through all nodes.
 
 ---
@@ -81,7 +81,7 @@ streamlit run app.py
 
 **Why LangGraph over simple LLM chaining?**
 LangGraph provides a compiled graph with typed state, enabling conditional routing (the supervisor
-retry loop), clear separation of concerns per node, and easy extension (add a new node without
+retry loop), clear separation of concerns per node and easy extension (add a new node without
 touching existing ones). Plain chaining would require manual state threading and no retry logic.
 
 **Why ChromaDB local?**
