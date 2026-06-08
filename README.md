@@ -1,4 +1,4 @@
-# 🤝 Sales Meeting Preparation Agent
+# Sales Meeting Preparation Agent
 
 A production-style **multi-agent LLM system** built with LangGraph, OpenAI, ChromaDB, and Streamlit.
 Given a company name and meeting context, it autonomously researches the prospect, extracts strategic insights,
