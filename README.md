@@ -117,50 +117,6 @@ sales_meeting_agent/
 
 ---
 
-## Extending the Project
-
-- **Add a CRM connector** — replace ChromaDB retrieval with a Salesforce/HubSpot API call
-- **Add memory** — persist past meeting briefs back into ChromaDB for learning over time
-- **Add a human-in-the-loop node** — pause before the Supervisor for manual review
-- **Deploy** — wrap `graph.py` as a FastAPI endpoint; deploy Streamlit to Streamlit Cloud
-
----
-
-## CV / Portfolio Narrative
-
-> "Built a production-style multi-agent LLM system using LangGraph to automate pre-meeting
-> sales intelligence. The system orchestrates four specialised agents (retrieval, research,
-> insight, presentation) with a quality-checking supervisor node that implements a conditional
-> retry loop. Demonstrates agentic orchestration, RAG with ChromaDB, ReAct tool use via Tavily,
-> structured LLM outputs, and a full Streamlit deployment."
-
----
-
-## Deploying for public use
-
-### Environment variables (server-side only)
-
-Set these on your server or hosting platform. Users never see or enter API keys.
-
-```bash
-OPENAI_API_KEY=sk-...
-TAVILY_API_KEY=tvly-...   # optional
-```
-
-On **Streamlit Cloud**: Settings → Secrets → paste as TOML:
-```toml
-OPENAI_API_KEY = "sk-..."
-TAVILY_API_KEY = "tvly-..."
-```
-
-On **Railway / Render / Fly.io**: add as environment variables in the dashboard.
-
-### Rate limiting
-
-The app limits each session to 5 briefs (`MAX_BRIEFS_PER_SESSION` in `app.py`).
-Change that constant to suit your expected traffic and API budget.
-For production, replace with server-side IP-based rate limiting (e.g. Redis + a middleware layer).
-
 ### Privacy compliance (GDPR / UK GDPR)
 
 The app already:
@@ -169,11 +125,3 @@ The app already:
 - Links to OpenAI's privacy policy
 - Tells users no data is stored after the session
 - Never asks for or stores personal data
-
-If you're deploying commercially, also add a privacy policy page and cookie notice.
-
-### What users never see
-
-- API keys (server env only)
-- Stack traces (all exceptions are caught and shown as generic messages)
-- Internal agent logs (status log strips emoji and internal markers)
