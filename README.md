@@ -1,127 +1,74 @@
-# Multi-Agent Sales Intelligence Platform
+# Sales Meeting Agent — multi-agent research prototype
 
-A production-style **multi-agent LLM system** built with LangGraph, OpenAI, ChromaDB and Streamlit.
-Given a company name and meeting context, it autonomously researches the prospect, extracts strategic insights
-and generates a complete, actionable meeting brief in under 60 seconds.
+An **experimental** LangGraph + Streamlit project for preparing structured sales-meeting briefs. The application chains a local ChromaDB retrieval step, optional Tavily web search, LLM-based research synthesis, insights and presentation drafting, a supervisor and final Markdown/PDF export.
 
----
+**Status:** demonstration prototype, not independently validated production software. There is no supported evidence for a guaranteed 60-second turnaround, clinical or commercial outcomes, GDPR compliance or external adoption.
 
 ## Architecture
 
-```
-Customer data
-     ↓
-ChromaDB RAG       ← Embed query, retrieve internal docs
-     ↓
-Research Agent     ← ReAct loop with Tavily web search
-     ↓
-Insight Agent      ← LLM reasoning: pain points, objections, stakeholder angles
-     ↓
-Presentation Agent ← Talk track, discovery questions, demo focus, CTA
-     ↓
-Supervisor         ← Quality check; retry Research agent if score < 4/10
-     ↓
-Final Brief        ← Formatted markdown + PDF export
+```text
+Company + meeting context
+           |
+      ChromaDB retriever (requires local knowledge base + OpenAI API)
+           |
+      Optional Tavily search + LLM synthesis
+           |
+      Insight agent -> Presentation agent
+           |
+      Supervisor (heuristic score; bounded optional retry)
+           |
+      Formatter -> Markdown / PDF export
 ```
 
-Built with **LangGraph StateGraph** for orchestration, conditional edges for the retry loop
-and a shared typed state object passed through all nodes.
+The supervisor uses a structured integer score from 1 to 10. A score below 4 can cause a second research pass, up to two total supervisor assessments. This is a **heuristic**, not independent quality validation. Search results and generated briefs must be fact-checked.
 
----
+## Running locally
 
-## Setup
-
-### 1. Install dependencies
+Use a Python environment and install dependencies:
 
 ```bash
-pip install -r requirements.txt
-```
-
-### 2. Configure API keys
-
-```bash
+git clone https://github.com/Rifa-111/sales-meeting-agent.git
+cd sales-meeting-agent
+python -m pip install -r requirements.txt
 cp .env.example .env
-# Edit .env and fill in:
-# OPENAI_API_KEY=sk-...
-# TAVILY_API_KEY=tvly-...   (optional — enables live web search)
-```
-
-Get a free Tavily key at [tavily.com](https://tavily.com) (1,000 free searches/month).
-
-### 3. Ingest the knowledge base
-
-```bash
+# Edit .env: set your own OPENAI_API_KEY and optional TAVILY_API_KEY
 python -m utils.ingest
-```
-
-This loads 8 synthetic documents (company profiles, product overview, objection handlers,
-competitive intel) into a local ChromaDB instance at `./chroma_db/`.
-
-### 4. Run the app
-
-```bash
 streamlit run app.py
 ```
 
----
+The ingest step embeds **eight synthetic demonstration documents** in a persistent `./chroma_db` directory. They are not actual client records. The demo includes fictional company information, invented sales results, product capabilities, ROI figures and case studies. **Do not quote these as established facts or use them as evidence of real customer outcomes.**
 
-## Features
+Tavily may be omitted, but retrieval and LLM generation still require a usable OpenAI API key. API calls can incur usage charges. You must review provider terms and policies.
 
-- **LangGraph orchestration** — typed `AgentState`, `StateGraph`, conditional edges
-- **RAG** — ChromaDB with OpenAI `text-embedding-3-small` embeddings; retrieves relevant internal docs
-- **Agentic research** — Research agent uses Tavily for live web search (news, signals, context)
-- **Supervisor loop** — LLM quality scoring with automatic retry (max 2 iterations)
-- **Structured outputs** — all agents return validated JSON parsed into clean markdown
-- **PDF + Markdown export** — downloadable brief from the Streamlit UI
-- **Streamlit UI** — real-time agent status log, example prefills, API key management in sidebar
+## Verification
 
----
-
-## Design Decisions
-
-**Why LangGraph over simple LLM chaining?**
-LangGraph provides a compiled graph with typed state, enabling conditional routing (the supervisor
-retry loop), clear separation of concerns per node and easy extension (add a new node without
-touching existing ones). Plain chaining would require manual state threading and no retry logic.
-
-**Why ChromaDB local?**
-Zero infrastructure setup — persistent client writes to `./chroma_db/`. In production, swap for
-a hosted Chroma instance or Pinecone. The embedding function interface is identical.
-
-**Why structured JSON outputs from agents?**
-Each agent returns JSON that the formatter assembles deterministically. This makes each agent's
-output testable and the pipeline debuggable — raw JSON is visible in the "View raw outputs" expander.
-
----
-
-## Project Structure
-
-```
-sales_meeting_agent/
-├── app.py                  # Streamlit UI
-├── graph.py                # LangGraph graph definition
-├── requirements.txt
-├── .env.example
-├── agents/
-│   ├── state.py            # Shared AgentState TypedDict
-│   ├── retriever.py        # ChromaDB RAG node
-│   ├── researcher.py       # ReAct web search node
-│   ├── insight.py          # Strategic insight node
-│   ├── presentation.py     # Meeting brief node
-│   ├── supervisor.py       # Quality check + routing
-│   └── formatter.py        # Markdown assembly
-└── utils/
-    ├── ingest.py           # ChromaDB ingestion script
-    └── pdf_export.py       # Markdown → PDF utility
+```bash
+python -m pip install pytest
+python -m pytest -q tests/
 ```
 
----
+GitHub Actions checks offline supervisor routing and source syntax without contacting third-party APIs. An end-to-end execution requires credentials and is **not currently verified by CI**.
 
-### Privacy compliance (GDPR / UK GDPR)
+## Safety and limitations
 
-The app already:
-- Shows users an inline data notice before they submit anything
-- States clearly that company names and meeting context are sent to OpenAI
-- Links to OpenAI's privacy policy
-- Tells users no data is stored after the session
-- Never asks for or stores personal data
+- Never add production customer or sensitive information to the demo without a suitable privacy and security assessment.
+- Company and meeting-context inputs go to OpenAI; Tavily queries are sent to Tavily when configured. ChromaDB persists the synthetic seed knowledge base on disk. Data handling also depends on third-party providers. **No claim of zero data retention or GDPR compliance is made.**
+- Model outputs may be incorrect, stale, fabricated or unsupported. Verify cited sources and proof points before using a brief.
+- The per-session counter is not a server-side rate limiter.
+- The code currently has no verified top-level open-source licence. A public repository does not automatically grant permission to redistribute or reuse it. The owner should choose a licence before describing this as MIT-licensed or openly reusable.
+- No independent GitHub adoption, community benefit or performance benchmark is currently demonstrated.
+
+See [SECURITY.md](SECURITY.md) for responsible-use considerations and [CONTRIBUTING.md](CONTRIBUTING.md) for genuine code and reproducibility feedback.
+
+## Project structure
+
+- `graph.py`: stateful LangGraph orchestration
+- `agents/`: retrieval, research, insights, presentation, review, formatting
+- `utils/ingest.py`: seeded synthetic knowledge base
+- `utils/pdf_export.py`: PDF helper
+- `app.py`: Streamlit interface
+- `tests/`: local offline tests
+
+## Contributing
+
+Technical reviews, reproductions, documented bug reports and code improvements are welcome. Public availability alone does not establish independent community adoption. Respect third-party data and content rights.
