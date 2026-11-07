@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime, timezone
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
@@ -59,8 +60,9 @@ def research_node(state: AgentState) -> AgentState:
     context = state["meeting_context"]
 
     # Step 1: Run web searches
-    search_q1 = f"{company} company news 2024 2025"
-    search_q2 = f"{company} strategic initiatives technology investment"
+    year = datetime.now(timezone.utc).year
+    search_q1 = f"{company} company recent news {year}"
+    search_q2 = f"{company} strategic initiatives technology investment {year}"
     web_results_1 = _tavily_search(search_q1)
     web_results_2 = _tavily_search(search_q2)
     web_context = f"=== Search 1: {search_q1} ===\n{web_results_1}\n\n=== Search 2: {search_q2} ===\n{web_results_2}"
@@ -92,6 +94,6 @@ Now produce the structured JSON research report."""
         research_output = raw
 
     log = state.get("status_log", [])
-    log.append(f"🔍 Research agent: completed web research and synthesis for {company}.")
+    log.append(f"🔍 Research agent: generated research synthesis for {company}; check sources independently.")
 
     return {**state, "research_output": research_output, "status_log": log}

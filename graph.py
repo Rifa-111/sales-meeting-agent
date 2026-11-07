@@ -54,6 +54,7 @@ def run_pipeline(company_name: str, meeting_context: str) -> AgentState:
         "presentation": "",
         "final_brief": "",
         "iteration": 0,
+        "quality_score": None,
         "status_log": [],
     }
     return compiled_graph.invoke(initial_state)
