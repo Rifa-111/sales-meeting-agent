@@ -1,11 +1,12 @@
 """
 Meeting Prep — public-facing Streamlit app.
 Keys are server-side only. Users never configure credentials.
-Rate limited per session. GDPR/privacy notice inline.
+A per-session usage counter and a data-handling notice are provided; neither is a GDPR compliance certification.
 """
 import os
 import time
 import hashlib
+from html import escape
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -345,8 +346,8 @@ with right:
       <div class="privacy-title">Data & privacy</div>
       <div class="privacy-body">
         The company name and meeting context you enter are sent to OpenAI to generate your brief.
-        No data is stored after your session ends. Do not enter personal data, confidential client
-        information, or anything you would not share with a third-party AI provider.
+        Input is sent to OpenAI and optional searches may be sent to Tavily. The demo knowledge base is stored locally in ChromaDB.
+        Providers may retain data under their own policies. Do not enter personal data or confidential client information.
         <a href="https://openai.com/policies/privacy-policy" target="_blank"
            style="color:#0071e3;text-decoration:none"> OpenAI privacy policy.</a>
       </div>
