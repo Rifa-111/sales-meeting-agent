@@ -519,7 +519,7 @@ st.markdown("""
     Built with LangGraph, OpenAI, ChromaDB
   </span>
   <span style="font-size:12px;color:#aeaeb2">
-    Your data is not stored after this session
+    Demo only — verify generated claims before use
   </span>
 </div>
 """, unsafe_allow_html=True)
