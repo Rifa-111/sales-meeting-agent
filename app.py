@@ -432,7 +432,7 @@ if generate and ready:
     def render_log(lines: list[str]) -> None:
         rows = "".join(
             f'<div class="log-row"><span class="log-time">{round(time.time()-start_ts):02d}s</span>'
-            f'<span class="log-text">{l}</span></div>'
+            f'<span class="log-text">{escape(l)}</span></div>'
             for l in lines[-10:]
         )
         status_slot.markdown(f'<div class="status-log">{rows}</div>', unsafe_allow_html=True)
